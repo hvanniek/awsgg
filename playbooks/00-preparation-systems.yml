@@ -1,0 +1,71 @@
+---
+- name: "DEMO: OSTree advertisement - environment preparation"
+  hosts: image_builder
+  gather_facts: true
+  become: true
+  vars_files:
+    - ../vars/main.yml
+  tasks:
+      # Install image-builder with infra.osbuild collection (https://github.com/redhat-cop/infra.osbuild)
+    # - name: Prepare Image Builder server
+    #   become: true
+    #   ansible.builtin.import_role:
+    #     name: infra.osbuild.setup_server
+
+
+    - name: Install required packages
+      ansible.builtin.dnf:
+        state: latest
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - createrepo
+          - yum-utils
+          - lorax
+          - skopeo
+          - composer-cli
+          - cockpit-composer
+          - podman
+          - genisoimage
+          - syslinux
+          - isomd5sum
+    - name: Enable services
+      ansible.builtin.systemd:
+        state: started
+        enabled: true
+        name: "{{ item }}"
+      loop:
+        - cockpit
+        - osbuild-composer
+
+
+    - name: Ensure repo folder exists
+      ansible.builtin.file:
+        path: /var/repos/greengrass
+        state: directory
+        mode: 493
+
+    - name: Extract zip files
+      ansible.builtin.unarchive:
+        src: "{{ playbook_dir }}/repos/packages.tgz"
+        dest: /var/repos/greengrass
+        creates: /var/repos/greengrass/packages
+
+    - name: Install RPMs if not there yet
+      ansible.builtin.shell: |
+        cd /tmp/rpms/packages
+        for rpm in *.rpm; do
+          sudo dnf install -y "$rpm"
+        done
+      args:
+        executable: /bin/bash
+
+    - name: Create repository in packages folder
+      ansible.builtin.shell: "createrepo /var/repos/greengrass/packages/\n"
+      args:
+        executable: /bin/bash
+
+    - name: Add source to image builder
+      ansible.builtin.shell: "composer-cli source add ../blueprints/gg-repo.toml\n"
+      args:
+        executable: /bin/bash

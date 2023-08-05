@@ -1,0 +1,51 @@
+---
+- name: "DEMO: Create new images "
+  hosts: image_builder
+  gather_facts: true
+  tasks:
+    - name: Set fact
+      ansible.builtin.set_fact:
+        builder_blueprint_name: demo_aws_greengrass
+        builder_custom_repos_persist: true
+        # The default is 2400, and it fails with the extra repos
+        builder_wait_compose_timeout: 600000
+    - name: Run the builder
+      become: true
+      ansible.builtin.import_role:
+        name: infra.osbuild.builder
+      vars:
+        builder_skip_repo: false
+        #### Add the repos for microshift. These should vanish on GA for 4.14
+        builder_compose_type: edge-commit
+        builder_compose_pkgs:
+          - "git"
+          - "iputils"
+          - "bind-utils"
+          - "net-tools"
+          - "iotop"
+          - "redhat-release"
+          - "java-17-openjdk"
+          - "pip"
+          - "python3-awsiotsdk"
+          - "awscli"
+          - "unzip"
+
+    - ansible.builtin.include_tasks:
+        file: ../../../common/playbooks/inject_iso.yml
+        
+    - name: Create images directory
+      become: true
+      ansible.builtin.file:
+        path: "/var/www/html/{{ builder_blueprint_name }}/images"
+        mode: 0755
+        state: directory
+
+    - name: Copy custom ISO to HTTP server
+      become: true
+      ansible.builtin.copy:
+        remote_src: true
+        src: /tmp/rhel-custom-kernelarg.iso
+        dest: "/var/www/html/{{ builder_blueprint_name }}/images/{{ builder_blueprint_name }}-custom-kernelarg.iso"
+
+    - debug:
+        msg: "Download the ISO image from: http://{{ ansible_host }}/{{ builder_blueprint_name }}/images/{{ builder_blueprint_name }}-custom-kernelarg.iso"

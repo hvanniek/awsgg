@@ -1,0 +1,52 @@
+name = "rhde-microshift"
+description = "RHDE Microshift Image"
+version = "1.0.0"
+modules = []
+groups = []
+
+[[packages]]
+name = "git"
+version = "*"
+
+[[packages]]
+name = "iputils"
+version = "*"
+
+[[packages]]
+name = "bind-utils"
+version = "*"
+
+[[packages]]
+name = "net-tools"
+version = "*"
+
+[[packages]]
+name = "iotop"
+version = "*"
+
+[[packages]]
+name = "redhat-release"
+version = "*"
+
+[[packages]]
+name = "java-17-openjdk"
+version = "*"
+
+[[packages]]
+name = "pip"
+version = "*"
+
+[[packages]]
+name = "python3-awsiotsdk"
+version = "*"
+
+[[packages]]
+name = "awscli"
+version = "*"
+
+[[packages]]
+name = "unzip"
+version = "*"
+
+
+[customizations]

@@ -1,0 +1,9 @@
+id = "gg-local"
+name = "Packages needed for GreenGrass"
+type = "yum-baseurl"
+url = "file:///var/repos/greengrass/packages"
+check_gpg = false
+check_ssl = false
+system = false
+rhsm = false
+
