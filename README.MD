@@ -61,6 +61,8 @@ ssh-copy-id <user>@<image builder IP>
 The image builder will need several additional packages to be installed in order to successfully build the edge installer needed for greengrass.
 
 Change into the AWSGG/playbooks directory and run the 00-prepare-systems.yml playbook
+
+> laptop
 ```
 cd playbooks
 ansible-playbook -vv 00-preparation-systems.yml
@@ -76,11 +78,14 @@ This will:
 ## Create the image
 The 01-build-ostree-aws.yml role will create the image needed to install on each device.
 Run this role in the playbooks directory as follows:
+
+> laptop
 ```
 ansible-playbook -vv 01-build-ostree-aws.yml
 ```
 
 The last line printed will provide the link on where to download the iso from the build server. Something like http://.../demo_aws_greengrass/images/demo_aws_greengrass-custom-kernelarg.iso
+
 
 The process executes the following tasks:
 - Define names 
@@ -88,8 +93,15 @@ The process executes the following tasks:
 - Configure the image for kickstart kickoff
 - Create http server for images
 - Update kickstarts in pre-built image and publish to http server
-- 
 
+
+## Install on devices
+Once the playbooks are done running, the iso is ready to be burned to a flashdrive using the dd command, or the [Fedora Image Writer](https://fedoraproject.org/workstation/download/)
+
+Boot the new device, ensuring it has network connectivity to the image builder server as well as internet in order to install the greengrass client.
+This should take about 3-5minutes to finish, depending on the device hardware and network speed.
+
+The final device will have the root login and password defined as per the [kickstart_greengrass.j2](https://github.com/hvanniek/awsgg/blob/main/kickstart_greengrass.j2) file
 
 ## Modifications to final image
 The kickstart_greengrass.j2 file sets up users and builds the shel script used to install greengrass.
