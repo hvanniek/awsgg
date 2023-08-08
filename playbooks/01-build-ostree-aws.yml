@@ -2,10 +2,14 @@
 - name: "DEMO: Create new images "
   hosts: image_builder
   gather_facts: true
+  vars_files:
+    - ../vars/main.yml
   tasks:
     - name: Set fact
       ansible.builtin.set_fact:
         builder_blueprint_name: demo_aws_greengrass
+        builder_kickstart: "{{ playbook_dir }}/../kickstart_greengrass.j2"
+        builder_pub_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
         builder_custom_repos_persist: true
         # The default is 2400, and it fails with the extra repos
         builder_wait_compose_timeout: 600000
@@ -30,9 +34,10 @@
           - "awscli"
           - "unzip"
 
-    - ansible.builtin.include_tasks:
-        file: ../../../common/playbooks/inject_iso.yml
-        
+    - name: Inject kernel args into iso
+      ansible.builtin.include_tasks:
+        file: "{{ playbook_dir }}/inject_iso.yml"
+
     - name: Create images directory
       become: true
       ansible.builtin.file:
@@ -47,5 +52,6 @@
         src: /tmp/rhel-custom-kernelarg.iso
         dest: "/var/www/html/{{ builder_blueprint_name }}/images/{{ builder_blueprint_name }}-custom-kernelarg.iso"
 
-    - debug:
+    - name: Print dowload link
+      debug:
         msg: "Download the ISO image from: http://{{ ansible_host }}/{{ builder_blueprint_name }}/images/{{ builder_blueprint_name }}-custom-kernelarg.iso"
