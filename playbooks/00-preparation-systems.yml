@@ -66,6 +66,6 @@
         executable: /bin/bash
 
     - name: Add source to image builder
-      ansible.builtin.shell: "composer-cli source add ../blueprints/gg-repo.toml\n"
+      ansible.builtin.shell: "composer-cli sources add ../blueprints/gg-repo.toml\n"
       args:
         executable: /bin/bash
