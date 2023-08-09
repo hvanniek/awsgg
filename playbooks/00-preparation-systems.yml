@@ -53,7 +53,7 @@
 
     - name: Install RPMs if not there yet
       ansible.builtin.shell: |
-        cd /var/repos/greengrass
+        cd /var/repos/greengrass/packages
         for rpm in *.rpm; do
           sudo dnf install -y "$rpm"
         done
