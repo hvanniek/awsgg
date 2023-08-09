@@ -65,7 +65,13 @@
       args:
         executable: /bin/bash
 
+    - name: Copy blueprint to server
+      ansible.builtin.copy:
+        src: ../blueprints/gg-repo.toml
+        dest: /var/repos/greengrass/
+        mode: 420
+
     - name: Add source to image builder
-      ansible.builtin.shell: "composer-cli sources add ../blueprints/gg-repo.toml\n"
+      ansible.builtin.shell: "composer-cli sources add /var/repos/greengrass/gg-repo.toml\n"
       args:
         executable: /bin/bash
