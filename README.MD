@@ -10,7 +10,7 @@ References:
 - [Red Hat Device Edge introduction](https://cloud.redhat.com/blog/introducing-the-new-red-hat-device-edge)
 - [Image Builder quickstart bash scripts](https://github.com/luisarizmendi/rhel-edge-quickstart)
 - [Ansible Collection for OSTree image management](https://github.com/redhat-cop/infra.osbuild)
-- [Upgrade and Rollback edge demo](https://github.com/luisarizmendi/edge-demos/blob/main/demos/upgrade-and-rollback)
+- [Upgrade and Rollback OSTree Edge demo](https://github.com/luisarizmendi/edge-demos/blob/main/demos/upgrade-and-rollback)
 
 
 ## Pre-requisites
