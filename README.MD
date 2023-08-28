@@ -98,6 +98,8 @@ The process executes the following tasks:
 ## Install on devices
 Once the playbooks are done running, the iso is ready to be burned to a flashdrive using the dd command, or the [Fedora Image Writer](https://fedoraproject.org/workstation/download/)
 
+NB: If using a VM for testing, ensure the machine has Firmware set to UEFI.
+
 Boot the new device, ensuring it has network connectivity to the image builder server as well as internet in order to install the greengrass client.
 This should take about 3-5minutes to finish, depending on the device hardware and network speed.
 
