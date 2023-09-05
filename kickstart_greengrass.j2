@@ -1,6 +1,7 @@
 lang en_US.UTF-8
 keyboard us
 timezone Etc/UTC --utc
+bootloader --append="console=tty0 console=ttyS0,115200"
 zerombr
 clearpart --all --initlabel
 autopart --type=plain --fstype=xfs --nohome
@@ -35,6 +36,7 @@ echo "export XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" >> /var/home/admin/.bashrc
 
 # fix ownership of user local files and SELinux contexts
 chown -R admin: /var/home/admin
+chmod
 restorecon -vFr /var/home/admin
 
 
@@ -77,24 +79,37 @@ mkdir -p /var/home/admin/.config/systemd/user/default.target.wants
 mkdir -p /var/home/admin/.config/systemd/user/sockets.target.wants
 mkdir -p /var/home/admin/.config/systemd/user/timers.target.wants
 mkdir -p /var/home/admin/.config/systemd/user/multi-user.target.wants
+mkdir -p /var/home/admin/GreengrassCore
 
 # Create the script to download and install greengrass
 cat > /var/usrlocal/bin/pre-install-greengrass.sh << EOF
 #!/bin/bash
 
-FOLDER=/var/greengrass/v2/certificates
-if [ -d "\$FOLDER" ]
-then
-    echo "already installed greengrass."
-    exit
-else 
-    echo "Greengrass not detected. Running installation" 
+service_exists() {
+    local n=$1
+    ehco "Checking service $n"
+    if [[ \$(systemctl list-units --all -t service --full --no-legend "\$n.service" | sed 's/^\s*//g' | cut -f1 -d' ') == \$n.service ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+if service_exists greengrass ; then
+    printf "Greengrass service detected. Skipping install."
+    exit 1
 fi
 
-mkdir -p /var/greengrass/v2/certificates
+printf "Installing Greengrass service" 
 
 # Download and extract the greengrass client
-curl -s https://d2s8p88vqu9w66.cloudfront.net/releases/greengrass-nucleus-latest.zip > /var/home/admin/greengrass-nucleus-latest.zip
+cd /var/home/admin
+while [ ! -f /var/home/admin/greengrass-nucleus-latest.zip ]; do
+    printf '.\n'
+    curl -o /var/home/admin/greengrass-nucleus-latest.zip --silent --fail https://d2s8p88vqu9w66.cloudfront.net/releases/greengrass-nucleus-latest.zip 
+    sleep 2
+done
+
 unzip /var/home/admin/greengrass-nucleus-latest.zip -d GreengrassCore && rm /var/home/admin/greengrass-nucleus-latest.zip
 
 # Install the greengrass service
@@ -108,6 +123,8 @@ chmod +x /var/usrlocal/bin/pre-install-greengrass.sh
 cat << EOF > /etc/systemd/system/pre-install-greengrass.service 
 [Service]
 Type=oneshot
+User=admin
+Group=admin
 ExecStart=/bin/bash /var/usrlocal/bin/pre-install-greengrass.sh
 
 [Install]
@@ -135,29 +152,3 @@ EOF
 systemctl enable enable-linger.service
 
 %end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
